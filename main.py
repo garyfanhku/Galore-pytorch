@@ -67,7 +67,6 @@ def main():
             # Update the model parameters using GaLore
             def update_func(lor_grad):
                 def closure():
-                    optimizer.zero_grad()
                     optimizer.step()
                     return lor_grad
 
