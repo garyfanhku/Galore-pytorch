@@ -60,7 +60,7 @@ def main():
 
             output = model(src_input, tgt_input)
             loss = nn.functional.cross_entropy(
-                output.view(-1, vocab_size), tgt_output.view(-1)
+                output.view(-1, vocab_size), tgt_output.reshape(-1)
             )
             loss.backward()
             # Update the model parameters using GaLore
