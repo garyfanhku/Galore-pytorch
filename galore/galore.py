@@ -1,19 +1,28 @@
 import torch
 import torch.nn as nn
 
+
 class GaLore:
     def __init__(self, model, rank=4, update_freq=200):
         self.model = model
         self.rank = rank
         self.update_freq = update_freq
-        self.step = 0
+        self.n_step = 0
 
         self.P = {}
         self.Q = {}
         for name, param in self.model.named_parameters():
             if param.requires_grad:
-                self.P[name] = torch.empty((param.data.shape[0], self.rank), dtype=param.data.dtype, device=param.data.device)
-                self.Q[name] = torch.empty((param.data.shape[1], self.rank), dtype=param.data.dtype, device=param.data.device)
+                self.P[name] = torch.empty(
+                    (param.data.shape[0], self.rank),
+                    dtype=param.data.dtype,
+                    device=param.data.device,
+                )
+                self.Q[name] = torch.empty(
+                    (param.data.shape[1], self.rank),
+                    dtype=param.data.dtype,
+                    device=param.data.device,
+                )
                 nn.init.orthogonal_(self.P[name])
                 nn.init.orthogonal_(self.Q[name])
 
@@ -28,9 +37,9 @@ class GaLore:
             for name, param in self.model.named_parameters():
                 if param.requires_grad:
                     grad = param.grad
-                    U, S, Vt = torch.linalg.svd(grad, full_matrices=False)
-                    self.P[name] = U[:, :self.rank]
-                    self.Q[name] = Vt[:self.rank, :].t()
+                    U, _, Vt = torch.linalg.svd(grad, full_matrices=False)
+                    self.P[name] = U[:, : self.rank]
+                    self.Q[name] = Vt[: self.rank, :].t()
 
     def step(self, update_func):
         for name, param in self.model.named_parameters():
@@ -41,6 +50,6 @@ class GaLore:
                 update = self.project_back(lor_update, name)
                 param.data += update
 
-        self.step += 1
-        if self.step % self.update_freq == 0:
+        self.n_step += 1
+        if self.n_step % self.update_freq == 0:
             self.update_projections()
