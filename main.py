@@ -44,13 +44,18 @@ def main():
     dataset = TensorDataset(src_data, tgt_data)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     model = TransformerModel(vocab_size, embed_dim, num_heads, num_layers)
+
+    model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     galore = GaLore(model, rank=4, update_freq=200)
 
     # Training loop
     for epoch in range(num_epochs):
         for batch_idx, (src, tgt) in enumerate(dataloader):
+            src, tgt = src.to(device), tgt.to(device)
             optimizer.zero_grad()
 
             # Shift the source and target sequences by one position
@@ -74,7 +79,7 @@ def main():
 
             galore.step(update_func)
 
-            if (batch_idx + 1) % 100 == 0:
+            if (batch_idx + 1) % 3 == 0:
                 print(
                     f"Epoch [{epoch+1}/{num_epochs}], Batch [{batch_idx+1}/{len(dataloader)}], Loss: {loss.item():.4f}"
                 )
