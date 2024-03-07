@@ -68,9 +68,10 @@ def main():
             def update_func(lor_grad):
                 def closure():
                     optimizer.zero_grad()
-                    return optimizer.step()
+                    optimizer.step()
+                    return lor_grad
 
-                return closure
+                return closure()
 
             galore.step(update_func)
 
