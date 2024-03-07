@@ -53,13 +53,12 @@ def main():
         for batch_idx, (src, tgt) in enumerate(dataloader):
             optimizer.zero_grad()
 
-            # Shift the target sequence by one position
+            # Shift the source and target sequences by one position
+            src_input = src[:, :-1]
             tgt_input = tgt[:, :-1]
             tgt_output = tgt[:, 1:]
 
-            # Forward pass
-            output = model(src, tgt_input)
-
+            output = model(src_input, tgt_input)
             loss = nn.functional.cross_entropy(
                 output.view(-1, vocab_size), tgt_output.view(-1)
             )
