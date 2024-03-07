@@ -63,8 +63,16 @@ def main():
                 output.view(-1, vocab_size), tgt_output.reshape(-1)
             )
             loss.backward()
+
             # Update the model parameters using GaLore
-            galore.step(lambda lor_grad: optimizer.step(lor_grad))
+            def update_func(lor_grad):
+                def closure():
+                    optimizer.zero_grad()
+                    return optimizer.step()
+
+                return closure
+
+            galore.step(update_func)
 
             if (batch_idx + 1) % 100 == 0:
                 print(
