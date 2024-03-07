@@ -12,7 +12,7 @@ class GaLore:
         self.P = {}
         self.Q = {}
         for name, param in self.model.named_parameters():
-            if param.requires_grad:
+            if param.requires_grad and len(param.shape) > 1:
                 self.P[name] = torch.empty(
                     (param.data.shape[0], self.rank),
                     dtype=param.data.dtype,
@@ -44,11 +44,14 @@ class GaLore:
     def step(self, update_func):
         for name, param in self.model.named_parameters():
             if param.requires_grad:
-                grad = param.grad
-                lor_grad = self.project(grad, name)
-                lor_update = update_func(lor_grad)
-                update = self.project_back(lor_update, name)
-                param.data += update
+                if len(param.shape) > 1:
+                    grad = param.grad
+                    lor_grad = self.project(grad, name)
+                    lor_update = update_func(lor_grad)
+                    update = self.project_back(lor_update, name)
+                    param.data += update
+                else:
+                    update_func(param.grad)
 
         self.n_step += 1
         if self.n_step % self.update_freq == 0:
