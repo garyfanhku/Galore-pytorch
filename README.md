@@ -2,10 +2,12 @@
 
 **WIP** Unofficial implementation of GaLore: Memory-Efficient LLM Training by Gradient Low-Rank Projection
 
-## TODO
+## Roadmap
 
-- [ ] layer-wise training tricks
-- [ ] sample training loop
+- [x] layer-wise training tricks
+- [x] sample training loop
+- [ ] add training logs on toy data
+- [ ] train on real* data
 
 
 ## Reference
